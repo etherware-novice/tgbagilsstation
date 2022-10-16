@@ -233,3 +233,64 @@
 	desc = "Just looking at this makes you want to giggle."
 	icon_state = "laughter"
 	list_reagents = list(/datum/reagent/consumable/laughter = 50)
+
+/obj/item/ai_voice
+	name = "voice synthesizer"
+	desc = "A repurposed vox system, redesigned for local use. Used for our less literate staff."
+	icon = 'icons/obj/device.dmi'
+	icon_state = "musicaltuner"
+
+	verb_say = "robotically beeps"
+	verb_ask = "robotically beeps"
+	verb_yell = "shrilly beeps"
+	verb_exclaim = "shrilly beeps"
+
+	var/last_message = "ERROR"
+	COOLDOWN_DECLARE(vox_cooldown)
+
+/obj/item/ai_voice/attack_self(mob/user, modifiers)
+	. = ..()
+
+	if(!COOLDOWN_FINISHED(src, vox_cooldown))
+		to_chat(user, span_notice("\The [src] is still recharging, please wait [COOLDOWN_TIMELEFT(src, vox_cooldown)] seconds."))
+		return
+
+	var/message = tgui_input_text(src, "Input speech.", "[src]", src.last_message)
+	if(!message)
+		return
+
+	user.emote("custom", message="pokes a few buttons on \the [src].")  // so non-runechat users can get a hint at whos talking
+	vox_speech(message, user)
+
+
+
+/obj/item/ai_voice/proc/vox_speech(message, var/mob/chat_user=null, force=0)
+
+	// so other non attack_self sources can be affected too
+	if(!COOLDOWN_FINISHED(src, vox_cooldown) && !force)
+		return
+
+	var/list/words = splittext(trim(message), "")
+	var/list/incorrect_words = list()
+
+	if(words.len > 30)
+		words.len = 30
+
+	for(var/word in words)
+		word = lowertext(trim(word))
+		if(!word)
+			words -= word
+			continue
+		if(!GLOB.vox_sounds[word])
+			incorrect_words += word
+
+	if(incorrect_words.len)
+		to_chat(chat_user, span_notice("These words are not available on the speech system: [english_list(incorrect_words)]."))
+		return
+
+	for(var/word in words)
+		playsound(src, GLOB.vox_sounds[word], 30, FALSE, 10, channel=AI_VOX)
+
+	say(message)
+	if(!force)
+		COOLDOWN_START(src, vox_speech, 2 MINUTES)
