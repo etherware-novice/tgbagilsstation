@@ -12,8 +12,10 @@
 		// AIs are loud and ugly
 		spans |= SPAN_COMMAND
 
-	var/quoted_message = say_quote(
-		message,
+	var/quoted_message = check_for_custom_say_emote(message, spans)
+
+	quoted_message = say_quote(
+		quoted_message,
 		spans
 	)
 
