@@ -2,7 +2,26 @@
 	log_talk(message, LOG_SAY, tag="binary")
 
 	var/designation = "Default Cyborg"
-	var/spans = list(SPAN_ROBOT)
+	var/spans = list()
+	var/list/message_mods = list()
+
+	var/quoted_message = check_for_custom_say_emote(message, message_mods)
+
+	to_chat(world, quoted_message)
+
+	quoted_message = say_quote(
+		quoted_message,
+		spans,
+		message_mods
+	)
+
+	to_chat(world, quoted_message)
+	to_chat(world, "spans")
+	to_chat(world, english_list(spans))
+	to_chat(world, "message_mods")
+	to_chat(world, english_list(message_mods))
+
+	spans = list(SPAN_ROBOT)
 
 	if(issilicon(src))
 		var/mob/living/silicon/player = src
@@ -12,12 +31,6 @@
 		// AIs are loud and ugly
 		spans |= SPAN_COMMAND
 
-	var/quoted_message = check_for_custom_say_emote(message, spans)
-
-	quoted_message = say_quote(
-		quoted_message,
-		spans
-	)
 
 	for(var/mob/M in GLOB.player_list)
 		if(M.binarycheck())
@@ -25,7 +38,7 @@
 				to_chat(
 					M,
 					span_binarysay("\
-						Robotic Talk, \
+						Robotic Talk,
 						<a href='?src=[REF(M)];track=[html_encode(name)]'>[span_name("[name] ([designation])")]</a> \
 						<span class='message'>[quoted_message]</span>\
 					"),
