@@ -5,13 +5,15 @@
 	var/spans = list()
 	var/list/message_mods = list()
 
-	var/quoted_message = check_for_custom_say_emote(message, message_mods)
+	var/quoted_message = get_message_mods(message, message_mods)
+	quoted_message = check_for_custom_say_emote(message, message_mods)
 
 	to_chat(world, quoted_message)
+	to_chat(world, "messagemods before quoted_message: [english_list(message_mods)]")
 
 	quoted_message = say_quote(
-		quoted_message,
-		spans,
+		quoted_message, \
+		spans, \
 		message_mods
 	)
 
@@ -38,7 +40,7 @@
 				to_chat(
 					M,
 					span_binarysay("\
-						Robotic Talk,
+						Robotic Talk, \
 						<a href='?src=[REF(M)];track=[html_encode(name)]'>[span_name("[name] ([designation])")]</a> \
 						<span class='message'>[quoted_message]</span>\
 					"),
