@@ -3649,3 +3649,30 @@
 /datum/reagent/consumable/ethanol/gin_garden/on_mob_life(mob/living/carbon/doll, delta_time, times_fired)
 	doll.adjust_bodytemperature(-5 * REM * TEMPERATURE_DAMAGE_COEFFICIENT * delta_time, doll.get_body_temp_normal())
 	..()
+
+// word pun stolen from tomska
+/datum/reagent/consumable/ethanol/motion
+	name = "perpetual motion"
+	desc = "A glass that can't seem to sit still."
+	icon_state = "beerglass"  // temp icon dont let this into final pls
+	/// The gravity applied to the cup and drinker
+	var/gravity_value = 0
+
+
+// makes the glass itself 0 gravity
+/datum/reagent/consumable/ethanol/motion/New(list/data)
+	. = ..()
+	AddElement(/datum/element/forced_gravity, gravity_value)
+
+/datum/reagent/consumable/ethanol/motion/Destroy()
+	RemoveElement(/datum/element/forced_gravity)
+	. = ..()
+
+/datum/reagent/consumable/ethanol/motion/on_mob_metabolize(mob/living/L)
+	. = ..()
+	consumer.AddElement(/datum/element/forced_gravity, gravity_value)
+	to_chat(consumer, span_warning("You feel yourself lift off the ground, slowly."))
+
+/datum/reagent/comsumable/ethanol/motion/on_mob_delete(mob/living/consumer)
+	. = ..()
+	consumer.RemoveElement(/datum/element/forced_gravity)
